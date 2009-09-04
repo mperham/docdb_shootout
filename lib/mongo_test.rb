@@ -26,7 +26,7 @@ def create_lots_of_documents(n=100_000)
 end
 
 def perform_queries
-  results = @db.find({ "age" => { :gte => 99 }}, :limit => 800, :sort => 'birthdate')
+  results = @db.find({ "age" => { '$gte' => 99 }}, :limit => 800, :sort => 'birthdate')
   results.next_object
   raise ArgumentError, "Unexpected query result: #{results.count}" if results.count < 800
   results.close
@@ -34,7 +34,7 @@ end
 
 def bulk_delete_documents
   # Obama's death panels want to kill old records too.
-  @db.remove 'age' => 80
+  @db.remove 'age' => { '$gte' => 80 }
 end
 
 def done
