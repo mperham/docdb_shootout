@@ -39,15 +39,29 @@ namespace :mongo do
   end
 end
 
-task :couch do
+namespace :couch do
+  task :start do
+    # Start CouchDBX
+  end
+  
+  task :stop do
+    # Stop CouchDBX
+  end
+  
+  task :run do
+    puts "========== Running CouchDB tests"
+    Rake::Task['couch:start'].invoke
+    require 'couch_test'
+    Rake::Task['couch:stop'].invoke
+  end
 end
 
 
 task :test do
 #  Rake::Task['tokyo:run'].invoke
 #  puts `rake tokyo:run`
-  puts `rake mongo:run`
-#  `rake couch:run`
+#  puts `rake mongo:run`
+  puts `rake couch:run`
 end
 
 task :default => :test
