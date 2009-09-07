@@ -10,7 +10,7 @@ namespace :tokyo do
   
   task :stop do
     system 'killall ttserver'
-    rm_f 'data.tct'
+    Dir['data.tct*'].each { |file| rm_f file }
   end
   
   task :run do
@@ -59,8 +59,8 @@ end
 
 task :test do
 #  Rake::Task['tokyo:run'].invoke
-#  puts `rake tokyo:run`
-#  puts `rake mongo:run`
+  puts `rake tokyo:run`
+  puts `rake mongo:run`
   puts `rake couch:run`
 end
 

@@ -3,17 +3,15 @@ require 'rubygems'
 
 gem 'jchris-couchrest'
 require 'couchrest'
+puts "Using jchris-couchrest #{CouchRest::VERSION}"
 
 def init_connection
-  puts "Using jchris-couchrest"
-  # @db = CouchRest.database("http://127.0.0.1:5984/docdb_shootout")
-  # @db.delete!
   @db = CouchRest.database!("http://127.0.0.1:5984/docdb_shootout")
   @db.recreate!
 #  @db.create_index 'age'
 end
 
-def create_lots_of_documents(n=100_000, batch_size=1000)
+def create_lots_of_documents(n=200_000, batch_size=1000)
   count = 0
   (n / batch_size).times do
     docs = []
@@ -32,6 +30,25 @@ def create_lots_of_documents(n=100_000, batch_size=1000)
 end
 
 def perform_queries
+  @db.save_doc({
+    "_id" => "_design/first", 
+    :views => {
+      :test => {
+        :map => <<-EOJS
+        function(doc) {
+          for(var w in doc) { 
+            if (!w.match(/^_/)) {
+              emit(w,doc[w])
+            }
+          }
+        }
+        EOJS
+      }
+    }
+  })
+  puts @db.view('first/test')['rows'].inspect
+  
+  
   results = @db.find({ "age" => { '$gte' => 99 }}, :limit => 800, :sort => 'birthdate')
   results.next_object
   raise ArgumentError, "Unexpected query result: #{results.count}" if results.count < 800
