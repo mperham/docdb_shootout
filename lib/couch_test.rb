@@ -11,7 +11,7 @@ def init_connection
 #  @db.create_index 'age'
 end
 
-def create_lots_of_documents(n=200_000, batch_size=1000)
+def create_lots_of_documents(n=20_000, batch_size=1000)
   count = 0
   (n / batch_size).times do
     docs = []
@@ -29,30 +29,18 @@ def create_lots_of_documents(n=200_000, batch_size=1000)
   end
 end
 
+class Person < CouchRest::ExtendedDocument
+  view_by :age
+  
+  def self.elderly(age, db)
+    rs = Person.by_age(:startkey => age, :database => db, :raw => true)
+  end
+end
+
 def perform_queries
-  @db.save_doc({
-    "_id" => "_design/first", 
-    :views => {
-      :test => {
-        :map => <<-EOJS
-        function(doc) {
-          for(var w in doc) { 
-            if (!w.match(/^_/)) {
-              emit(w,doc[w])
-            }
-          }
-        }
-        EOJS
-      }
-    }
-  })
-  puts @db.view('first/test')['rows'].inspect
-  
-  
-  results = @db.find({ "age" => { '$gte' => 99 }}, :limit => 800, :sort => 'birthdate')
-  results.next_object
-  raise ArgumentError, "Unexpected query result: #{results.count}" if results.count < 800
-  results.close
+  count = Person.elderly(99, @db)['total_rows']
+#  results = @db.find({ "age" => { '$gte' => 99 }}, :limit => 800, :sort => 'birthdate')
+  raise ArgumentError, "Unexpected query result: #{count}" if count < 800
 end
 
 def bulk_delete_documents
@@ -68,7 +56,7 @@ begin
   Benchmark.bm(10) do |x|
     x.report('init') { init_connection }
     x.report('create') { create_lots_of_documents }
-#    x.report('query') { perform_queries }
+    x.report('query') { perform_queries }
 #    x.report('delete') { bulk_delete_documents }
   end
 ensure
