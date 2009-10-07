@@ -1,9 +1,16 @@
 require 'benchmark'
 require 'rubygems'
 
-gem 'mongodb-mongo'
+=begin
+ gem install gemcutter
+ gem tumble
+ gem install mongo
+ gem install mongo_ext
+=end
+
+gem 'mongo'
 require 'mongo'
-puts "Using mongodb-mongo"
+puts "Using mongo #{Mongo::VERSION}"
 
 class Mongo::Collection
   def size
