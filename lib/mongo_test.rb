@@ -46,7 +46,7 @@ end
 
 def perform_queries
   count = 0
-  @db.find({ "age" => { '$gte' => 90 }}, :limit => 1000, :sort => 'birthdate') do |cursor|
+  @db.find({ "age" => { '$gte' => 90 }}, :limit => 1000, :sort => [['birthdate']]) do |cursor|
     # Mongo does not perform the query until the cursor actually needs the data so we have
     # to eager load the results.
     cursor.each do |row|
